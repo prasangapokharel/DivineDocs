@@ -5,7 +5,6 @@ This project is a web application built with Flask that allows users to upload P
 ## Features
 
 - **PDF to Word Conversion**: Convert PDF files to Word documents.
-- **PDF Compression**: Compress PDF files by reducing the resolution of images.
 
 ## Requirements
 
