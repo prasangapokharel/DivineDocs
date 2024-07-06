@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/navbar.css') }}">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="/" class="logo">
+                <img src="{{ url_for('static', filename='images/logo.svg') }}" alt="Hamro PDF Logo">
+            </a>
+            <div class="nav-links">
+                <a href="/">CONVERT PDF</a>
+                <a href="/compress">COMPRESS PDF</a>
+               
+                <div class="dropdown">
+                    <button class="dropbtn">ALL PDF TOOLS</button>
+                    <div class="dropdown-content">
+                        <a href="#">PDF to Word</a>
+                        <a href="#">Word to PDF</a>
+                        <a href="#">Tool 1</a>
+
+                    </div>
+                </div>
+            </div>
+            <div class="auth-links">
+                <a href="#">Login</a>
+                <a href="#" class="signup">Sign up</a>
+            </div>
+            <div class="mobile-menu">
+                <span class="menu-icon">&#9776;</span>
+            </div>
+        </div>
+    </nav>
+    <div class="mobile-nav">
+        <a href="/">CONVERT PDF</a>
+        <a href="/compress">COMPRESS PDF</a>
+        <a href="#">MERGE PDF</a>
+        <a href="#">SPLIT PDF</a>
+        <a href="#">PDF to Word</a>
+        <a href="#">Word to PDF</a>
+        <a href="#">Tool 1</a>
+        <a href="#">Tool 2</a>
+        <a href="#">Tool 3</a>
+        <a href="#">Login</a>
+        <a href="#" class="signup">Sign up</a>
+    </div>
+    <script>
+        document.querySelector('.menu-icon').addEventListener('click', () => {
+            document.querySelector('.mobile-nav').classList.toggle('show');
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,121 @@
+body {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    background: linear-gradient(135deg, #a2e5d7, #dbf3fa);
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    margin: 0;
+}
+.header {
+    text-align: center;
+    max-width: 100%;
+    margin-top: 20px;
+}
+.icon {
+    width: 50px;
+    height: auto;
+    display: block;
+    margin: 0;
+}
+h2 {
+    color: #333;
+    font-size: 1.8rem;
+    margin-bottom: 10px;
+}
+p {
+    color: #666;
+    font-size: 1rem;
+    margin-bottom: 0px;
+}
+.container {
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    width: 90%;
+    max-width: 500px;
+    margin: auto;
+}
+input[type="file"] {
+    display: none;
+}
+.file-upload {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+    padding: 40px 20px;
+    border: 2px dashed #ddd;
+    border-radius: 12px;
+    background-color: #fff;
+    text-align: center;
+    cursor: pointer;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+    box-sizing: border-box;
+}
+.file-upload:hover {
+    background-color: #f0f0f5;
+    border-color: #10a37f;
+}
+.file-upload span {
+    display: block;
+    font-size: 1.2rem;
+    color: #666;
+    margin-bottom: 10px;
+}
+.browse-btn {
+    background-color: #10a37f;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-size: 1rem;
+    border-radius: 4px;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+.browse-btn:hover {
+    background-color: white;
+    color: #10a37f;
+    border: 2px solid #10a37f;
+}
+.convert-btn {
+    background-color: #10a37f;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-size: 1rem;
+    border-radius: 4px;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    margin-top: 20px;
+}
+.convert-btn:hover {
+    background-color: white;
+    color: #10a37f;
+    border: 2px solid #10a37f;
+}
+.download-button{
+    background-color: #10a37f;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    text-decoration: none;
+    font-size: 1rem;
+    border-radius: 4px;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    margin-top: 20px;
+}
+.download-button:hover{
+    background-color: white;
+    color: #10a37f;
+    border: 2px solid #10a37f;
+}
+footer {
+    margin-top: 20px;
+    font-size: 0.9rem;
+    color: #aaa;
+    text-align: center;
+}

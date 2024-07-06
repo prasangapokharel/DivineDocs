@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Compress PDF</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/upload.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/navbar.css') }}">
+</head>
+<body>
+    {% include 'navbar.html' %}
+    <div class="header">
+        <img src="{{ url_for('static', filename='images/pdf-icon.png') }}" alt="PDF Icon" class="icon">
+        <h2>COMPRESS PDF</h2>
+        <p>Upload a PDF file to compress it.</p>
+    </div>
+    <div class="container">
+        <form id="compressForm" enctype="multipart/form-data">
+            <label for="file" class="file-upload" id="fileUploadLabel">
+                <input type="file" name="file" id="file" accept="application/pdf" required>
+                <span id="fileUploadText">DRAG AND DROP FILE HERE</span>
+                <button type="button" class="browse-btn" id="browseButton">Browse file</button>
+            </label>
+            <p id="fileInfo"></p>
+            <label for="compression_ratio">Compression Ratio: <span id="compressionValue">50%</span></label>
+            <input type="range" id="compression_ratio" name="compression_ratio" min="10" max="90" value="50">
+            <button type="submit" class="convert-btn">Compress</button>
+        </form>
+        <div id="downloadLinks" style="display: none;">
+            <h2>Compression Successful!</h2>
+            <a id="downloadPdf" class="download-button" href="#">Download Original PDF</a>
+            <a id="downloadCompressed" class="download-button" href="#">Download Compressed PDF</a>
+        </div>
+    </div>
+    <footer>
+        Powered by Prasanga
+    </footer>
+    <script>
+        document.getElementById('browseButton').addEventListener('click', function() {
+            document.getElementById('file').click();
+        });
+
+        document.getElementById('file').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                document.getElementById('fileUploadText').textContent = file.name;
+                document.getElementById('fileInfo').textContent = `File name: ${file.name}, File size: ${Math.round(file.size / 1024)} KB`;
+            }
+        });
+
+        document.getElementById('compression_ratio').addEventListener('input', function() {
+            document.getElementById('compressionValue').textContent = `${this.value}%`;
+        });
+
+        const fileUploadLabel = document.getElementById('fileUploadLabel');
+        const fileInput = document.getElementById('file');
+
+        fileUploadLabel.addEventListener('dragover', function(event) {
+            event.preventDefault();
+            fileUploadLabel.classList.add('dragover');
+        });
+
+        fileUploadLabel.addEventListener('dragleave', function() {
+            fileUploadLabel.classList.remove('dragover');
+        });
+
+        fileUploadLabel.addEventListener('drop', function(event) {
+            event.preventDefault();
+            fileUploadLabel.classList.remove('dragover');
+            const file = event.dataTransfer.files[0];
+            fileInput.files = event.dataTransfer.files;
+            if (file) {
+                document.getElementById('fileUploadText').textContent = file.name;
+                document.getElementById('fileInfo').textContent = `File name: ${file.name}, File size: ${Math.round(file.size / 1024)} KB`;
+            }
+        });
+
+        document.getElementById('compressForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const formData = new FormData(this);
+
+            fetch('/compress', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert(data.error);
+                } else {
+                    document.getElementById('downloadLinks').style.display = 'block';
+                    document.getElementById('downloadPdf').href = `/download/${data.original_filename}?file_path=${data.pdf_path}`;
+                    document.getElementById('downloadCompressed').href = `/download/${data.compressed_filename}?file_path=${data.compressed_pdf_path}`;
+                }
+            })
+            .catch(error => {
+                alert('An error occurred while uploading the file.');
+                console.error('Error:', error);
+            });
+        });
+    </script>
+</body>
+</html>
