@@ -1,8 +1,8 @@
 from flask import Flask, request, send_file, render_template, jsonify
-from pdf2docx import Converter
-import fitz  # PyMuPDF
 import os
 import mysql.connector
+from pdf2docx import Converter
+from docx2pdf import convert  # Importing docx2pdf for DOCX to PDF conversion
 
 app = Flask(__name__)
 UPLOAD_FOLDER = 'uploads'
@@ -21,10 +21,6 @@ db_config = {
 def upload_form():
     return render_template('upload.html')
 
-@app.route('/compress')
-def compress_form():
-    return render_template('compress.html')
-
 @app.route('/upload', methods=['POST'])
 def upload_file():
     if 'file' not in request.files:
@@ -33,11 +29,9 @@ def upload_file():
     if file.filename == '':
         return jsonify({"error": "No selected file"}), 400
     if file and file.filename.endswith('.pdf'):
-        # Save file to UPLOAD_FOLDER
         pdf_path = os.path.join(UPLOAD_FOLDER, file.filename)
         file.save(pdf_path)
 
-        # Insert file path into database
         try:
             conn = mysql.connector.connect(**db_config)
             cursor = conn.cursor()
@@ -48,12 +42,16 @@ def upload_file():
         except mysql.connector.Error as err:
             return jsonify({"error": str(err)}), 500
 
-        # Convert PDF to DOCX
         word_filename = os.path.splitext(file.filename)[0] + '.docx'
         word_path = os.path.join(UPLOAD_FOLDER, word_filename)
-        converter = Converter(pdf_path)
-        converter.convert(word_path)
-        converter.close()
+
+        try:
+            # Convert PDF to DOCX
+            cv = Converter(pdf_path)
+            cv.convert(word_path)
+            cv.close()
+        except Exception as e:
+            return jsonify({"error": str(e)}), 500
 
         return jsonify({
             "original_filename": file.filename,
@@ -63,55 +61,35 @@ def upload_file():
         }), 200
     return jsonify({"error": "Invalid file type"}), 400
 
-def compress_pdf(input_pdf_path, output_pdf_path, zoom=0.5):
-    """
-    Compress a PDF file by reducing the resolution of images.
-    
-    :param input_pdf_path: Path to the input PDF file
-    :param output_pdf_path: Path to the output compressed PDF file
-    :param zoom: Zoom factor to reduce the image resolution (default is 0.5)
-    """
-    document = fitz.open(input_pdf_path)
-    
-    # Iterate through pages
-    for page_num in range(len(document)):
-        page = document.load_page(page_num)  # Load the page
-        pix = page.get_pixmap(matrix=fitz.Matrix(zoom, zoom))  # Render the page to an image with reduced resolution
-        img = fitz.Pixmap(pix, 0) if pix.alpha else pix  # Handle alpha channel
-        
-        # Create a new PDF page with the reduced resolution image
-        new_doc = fitz.open()
-        new_page = new_doc.new_page(width=img.width, height=img.height)
-        new_page.insert_image(new_page.rect, pixmap=img)
-        
-        # Replace the original page with the new compressed page
-        document[page_num] = new_page
-    
-    document.save(output_pdf_path, garbage=4, deflate=True)
+@app.route('/word-to-pdf')
+def word_to_pdf_form():
+    return render_template('word_to_pdf.html')
 
-@app.route('/compress', methods=['POST'])
-def compress_file():
+@app.route('/convert-word-to-pdf', methods=['POST'])
+def convert_word_to_pdf():
     if 'file' not in request.files:
         return jsonify({"error": "No file part"}), 400
     file = request.files['file']
-    compression_ratio = request.form.get('compression_ratio', type=int, default=50)
     if file.filename == '':
         return jsonify({"error": "No selected file"}), 400
-    if file and file.filename.endswith('.pdf'):
-        # Save file to UPLOAD_FOLDER
-        pdf_path = os.path.join(UPLOAD_FOLDER, file.filename)
-        file.save(pdf_path)
+    if file and file.filename.endswith('.docx'):
+        word_path = os.path.join(UPLOAD_FOLDER, file.filename)
+        file.save(word_path)
 
-        compressed_pdf_path = os.path.join(UPLOAD_FOLDER, 'compressed_' + file.filename)
-
-        # Compress the PDF using PyMuPDF
-        compress_pdf(pdf_path, compressed_pdf_path, zoom=compression_ratio/100)
+        pdf_filename = os.path.splitext(file.filename)[0] + '.pdf'
+        pdf_path = os.path.join(UPLOAD_FOLDER, pdf_filename)
+        
+        try:
+            # Convert DOCX to PDF using docx2pdf
+            convert(word_path, pdf_path)
+        except Exception as e:
+            return jsonify({"error": str(e)}), 500
 
         return jsonify({
             "original_filename": file.filename,
-            "pdf_path": pdf_path,
-            "compressed_filename": 'compressed_' + file.filename,
-            "compressed_pdf_path": compressed_pdf_path
+            "word_path": word_path,
+            "pdf_filename": pdf_filename,
+            "pdf_path": pdf_path
         }), 200
     return jsonify({"error": "Invalid file type"}), 400
 

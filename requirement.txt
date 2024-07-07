@@ -1,0 +1,5 @@
+Flask==2.0.3
+mysql-connector-python==8.0.26
+pdf2docx==0.5.1
+docx2pdf==0.1.7
+comtypes==1.1.9

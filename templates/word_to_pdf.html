@@ -1,33 +1,30 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Compress PDF</title>
+    <title>Word to PDF Converter</title>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/upload.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/navbar.css') }}">
 </head>
 <body>
     {% include 'navbar.html' %}
     <div class="header">
-        <img src="{{ url_for('static', filename='images/pdf-icon.png') }}" alt="PDF Icon" class="icon">
-        <h2>COMPRESS PDF</h2>
-        <p>Upload a PDF file to compress it.</p>
+        <h2>WORD TO PDF CONVERTER</h2>
+        <p>Upload a Word document to convert it to a PDF file.</p>
     </div>
     <div class="container">
-        <form id="compressForm" enctype="multipart/form-data">
+        <form id="uploadForm" enctype="multipart/form-data">
             <label for="file" class="file-upload" id="fileUploadLabel">
-                <input type="file" name="file" id="file" accept="application/pdf" required>
+                <input type="file" name="file" id="file" accept=".docx" required>
                 <span id="fileUploadText">DRAG AND DROP FILE HERE</span>
                 <button type="button" class="browse-btn" id="browseButton">Browse file</button>
             </label>
             <p id="fileInfo"></p>
-            <label for="compression_ratio">Compression Ratio: <span id="compressionValue">50%</span></label>
-            <input type="range" id="compression_ratio" name="compression_ratio" min="10" max="90" value="50">
-            <button type="submit" class="convert-btn">Compress</button>
+            <button type="submit" class="convert-btn">Convert</button>
         </form>
         <div id="downloadLinks" style="display: none;">
-            <h2>Compression Successful!</h2>
-            <a id="downloadPdf" class="download-button" href="#">Download Original PDF</a>
-            <a id="downloadCompressed" class="download-button" href="#">Download Compressed PDF</a>
+            <h2>Conversion Successful!</h2>
+            <a id="downloadDocx" class="download-button" href="#">Download Original Word Document</a>
+            <a id="downloadPdf" class="download-button" href="#">Download PDF</a>
         </div>
     </div>
     <footer>
@@ -44,10 +41,6 @@
                 document.getElementById('fileUploadText').textContent = file.name;
                 document.getElementById('fileInfo').textContent = `File name: ${file.name}, File size: ${Math.round(file.size / 1024)} KB`;
             }
-        });
-
-        document.getElementById('compression_ratio').addEventListener('input', function() {
-            document.getElementById('compressionValue').textContent = `${this.value}%`;
         });
 
         const fileUploadLabel = document.getElementById('fileUploadLabel');
@@ -73,11 +66,11 @@
             }
         });
 
-        document.getElementById('compressForm').addEventListener('submit', function(event) {
+        document.getElementById('uploadForm').addEventListener('submit', function(event) {
             event.preventDefault();
             const formData = new FormData(this);
 
-            fetch('/compress', {
+            fetch('/convert-word-to-pdf', {
                 method: 'POST',
                 body: formData
             })
@@ -87,8 +80,8 @@
                     alert(data.error);
                 } else {
                     document.getElementById('downloadLinks').style.display = 'block';
-                    document.getElementById('downloadPdf').href = `/download/${data.original_filename}?file_path=${data.pdf_path}`;
-                    document.getElementById('downloadCompressed').href = `/download/${data.compressed_filename}?file_path=${data.compressed_pdf_path}`;
+                    document.getElementById('downloadDocx').href = `/download/${data.original_filename}?file_path=${data.word_path}`;
+                    document.getElementById('downloadPdf').href = `/download/${data.pdf_filename}?file_path=${data.pdf_path}`;
                 }
             })
             .catch(error => {
