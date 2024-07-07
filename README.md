@@ -1,23 +1,56 @@
-# PDF Converter and Compressor
+# Document Converter
 
-This project is a web application built with Flask that allows users to upload PDF files and convert them to Word documents or compress them.
+This project provides a web-based application for converting PDF files to Word documents (DOCX) and Word documents (DOCX) to PDF files.
 
 ## Features
 
-- **PDF to Word Conversion**: Convert PDF files to Word documents.
+- Convert PDF to Word (DOCX)
+- Convert Word (DOCX) to PDF
 
 ## Requirements
 
-- Python 3.6+
-- Flask
-- pdf2docx
-- PyMuPDF
-- MySQL
+- Python 3.6 or higher
+- MySQL database
 
-## Setup Instructions
+## Installation
 
 ### 1. Clone the Repository
 
-```bash
-git clone https://github.com/yourusername/pdf-converter-compressor.git
-cd pdf-converter-compressor
+First, clone the repository to your local machine:
+
+```sh
+git clone https://github.com/prasangapokharel/DivineDocs.git
+cd Divine Docs
+
+```
+### 2.Create and Activate a Virtual Environment
+
+```
+python -m venv venv
+source venv/bin/activate   # On Windows use `venv\Scripts\activate
+```
+
+### 3. Install Required Packages
+```
+pip install -r requirements.txt
+```
+
+### 4. Set Up the MySQL Database
+```
+CREATE DATABASE pdf_converter;
+```
+
+### 5. Run the Flask Application
+```
+python app.py
+
+```
+
+### 6. Open Your Web Browser
+
+```
+http://127.0.0.1:5000/
+
+```
+
+
