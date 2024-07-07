@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF Tools</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}">
+</head>
+<body>
+    {% include 'navbar.html' %}
+
+    <header>
+        <h1>Every tool you need to work with PDFs in one place</h1>
+        <p>All are 100% FREE and easy to use! Merge, split, compress, convert, rotate, unlock, and watermark PDFs with just a few clicks.</p>
+    </header>
+    <div class="container">
+        <div class="card">
+            <a href="/merge-pdf">
+                <div class="icon merge"></div>
+                <h3>Merge PDF</h3>
+                <p>Combine PDFs in the order you want with the easiest PDF merger available.</p>
+            </a>
+        </div>
+        <div class="card">
+            <a href="/protect-pdf">
+                <div class="icon split"></div>
+                <h3>Protect PDF</h3>
+                <p>Separate one page or a whole set for easy conversion into independent PDF files.</p>
+            </a>
+        </div>
+        <div class="card">
+            <a href="/pdf-to-excel">
+                <div class="icon compress"></div>
+                <h3>PDF to EXCEL</h3>
+                <p>Reduce file size while optimizing for maximal PDF quality.</p>
+            </a>
+        </div>
+        <div class="card">
+            <a href="/word-to-pdf">
+                <div class="icon convert"></div>
+                <h3>Word to PDF</h3>
+                <p>Easily convert your PDF files into easy to edit DOC and DOCX documents.</p>
+            </a>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Merge PDF Files</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/merge.css') }}">
+</head>
+<body>
+     {% include 'navbar.html' %}
+   <div class="header">
+        <h2>Merge PDF Files</h2>
+        <p>Upload PDF files to merge them into a single PDF document.</p>
+    </div>
+    <div class="container">
+        <div class="file-upload-section">
+            <div class="file-upload" id="fileUpload">
+                <input type="file" name="files" id="fileInput" accept="application/pdf" multiple required>
+                <div class="file-preview" id="filePreview">
+                    <span id="fileName">DRAG AND DROP FILES HERE OR CLICK TO UPLOAD</span>
+                </div>
+            </div>
+            <button type="button" class="add-btn" id="addButton">+</button>
+        </div>
+        <div class="file-cards" id="fileCards"></div>
+        <button type="submit" class="convert-btn" id="mergeButton">Merge</button>
+        <div id="downloadLinks" style="display: none;">
+            <h2>Merge Successful!</h2>
+            <a id="downloadMergedPdf" class="download-button" href="#">Download Merged PDF</a>
+        </div>
+    </div>
+    <footer>
+        Powered by Prasanga
+    </footer>
+    <script>
+        let fileList = [];
+
+        document.getElementById('fileInput').addEventListener('change', handleFileSelect);
+        document.getElementById('addButton').addEventListener('click', () => {
+            document.getElementById('fileInput').click();
+        });
+
+        const fileUpload = document.getElementById('fileUpload');
+        fileUpload.addEventListener('dragover', (event) => {
+            event.preventDefault();
+            fileUpload.classList.add('dragover');
+        });
+        fileUpload.addEventListener('dragleave', () => {
+            fileUpload.classList.remove('dragover');
+        });
+        fileUpload.addEventListener('drop', (event) => {
+            event.preventDefault();
+            fileUpload.classList.remove('dragover');
+            handleFileSelect(event);
+        });
+
+        function handleFileSelect(event) {
+            const files = event.dataTransfer ? event.dataTransfer.files : event.target.files;
+            for (let i = 0; i < files.length; i++) {
+                if (files[i].type === 'application/pdf' && !fileList.includes(files[i])) {
+                    getPdfDetails(files[i]).then(details => {
+                        fileList.push(details);
+                        displayFiles();
+                    });
+                }
+            }
+        }
+
+        function getPdfDetails(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const pdf = new Uint8Array(e.target.result);
+                    const pdfjsLib = window['pdfjs-dist/build/pdf'];
+                    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.5.207/pdf.worker.min.js';
+                    pdfjsLib.getDocument({ data: pdf }).promise.then((doc) => {
+                        resolve({
+                            file: file,
+                            name: file.name,
+                            size: (file.size / 1024).toFixed(2) + ' KB',
+                            pages: doc.numPages
+                        });
+                    });
+                };
+                reader.readAsArrayBuffer(file);
+            });
+        }
+
+        function displayFiles() {
+            const fileCards = document.getElementById('fileCards');
+            fileCards.innerHTML = '';
+            fileList.forEach((details, index) => {
+                const card = document.createElement('div');
+                card.classList.add('file-card');
+                card.innerHTML = `
+                    <div class="file-card-body">
+                        <p>${details.name}</p>
+                        <p>Size: ${details.size}</p>
+                        <p>Pages: ${details.pages}</p>
+                        <button type="button" class="remove-btn" onclick="removeFile(${index})">x</button>
+                    </div>
+                `;
+                fileCards.appendChild(card);
+            });
+        }
+
+        function removeFile(index) {
+            fileList.splice(index, 1);
+            displayFiles();
+        }
+
+        document.getElementById('mergeButton').addEventListener('click', function(event) {
+            event.preventDefault();
+            if (fileList.length < 2) {
+                alert('Please upload at least two PDF files to merge.');
+                return;
+            }
+
+            const formData = new FormData();
+            fileList.forEach((details, index) => {
+                formData.append(`file${index + 1}`, details.file);
+            });
+
+            fetch('/merge-pdf', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert(data.error);
+                } else {
+                    document.getElementById('downloadLinks').style.display = 'block';
+                    document.getElementById('downloadMergedPdf').href = `/download/${data.merged_filename}?file_path=${data.merged_pdf_path}`;
+                }
+            })
+            .catch(error => {
+                alert('An error occurred while merging the files.');
+                console.error('Error:', error);
+            });
+        });
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.5.207/pdf.min.js"></script>
+</body>
+</html>

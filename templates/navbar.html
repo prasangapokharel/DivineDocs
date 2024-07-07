@@ -1,31 +1,34 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/navbar.css') }}">
+    <title>Navbar</title>
 </head>
 <body>
     <nav class="navbar">
         <div class="navbar-container">
             <a href="/" class="logo">
                 <img src="{{ url_for('static', filename='images/logo.svg') }}" alt="Hamro PDF Logo">
+             
             </a>
             <div class="nav-links">
-                <a href="/">🔄 CONVERT PDF to WORD</a>
+                <a href="/upload">🔄 CONVERT PDF to WORD</a>
                 <a href="/pdf-to-excel">🔄 CONVERT PDF to EXCEL</a>
-
                 <a href="/protect-pdf">🔐 PROTECT PDF</a>
+                <a href="/merge-pdf">🧣 MERGE PDF</a>
                 <div class="dropdown">
                     <button class="dropbtn">ALL PDF TOOLS</button>
                     <div class="dropdown-content">
                         <a href="/">PDF to Word</a>
                         <a href="/word-to-pdf">Word to PDF</a>
-                        <a href="#">Tool 1</a>
+                        <a href="/ocr">OCR</a>
                         <!-- Add more tools here as needed -->
                     </div>
                 </div>
             </div>
             <div class="auth-links">
-                
                 <a href="#" class="signup">Sign up</a>
             </div>
             <div class="mobile-menu">

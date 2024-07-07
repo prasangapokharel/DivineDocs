@@ -4,11 +4,13 @@
     border-bottom: 1px solid #ddd;
     padding: 10px 20px;
     display: flex;
+    margin: 0 auto;
     justify-content: space-between;
     align-items: center;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     position: relative;
     z-index: 1000;
+    width: 90%;
 }
 .navbar-container {
     display: flex;
@@ -27,6 +29,12 @@
 .logo img {
     height: 60px;
     margin-right: 10px;
+}
+.nav-links {
+    display: flex;
+    align-items: center;
+    flex-grow: 1;
+    justify-content: space-around;
 }
 .nav-links a, .auth-links a {
     margin: 0 10px;
