@@ -5,8 +5,10 @@ This project provides a web-based application for converting PDF files to Word d
 
 ## Features
 
-- Convert PDF to Word (DOCX)
-- Convert Word (DOCX) to PDF
+- 🔄Convert PDF to Word (DOCX)
+- 🔄Convert PDF to EXCEL (XLSX)
+- 🔄Convert Word (DOCX) to PDF
+- 🔐Protect PDF (PASSWORD)
 
 ## Requirements
 
