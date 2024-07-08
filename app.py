@@ -1,4 +1,4 @@
-from flask import Flask, request, send_file, render_template, jsonify
+from flask import Flask, request, send_file, render_template, jsonify, redirect, url_for, flash
 import os
 import mysql.connector
 from pdf2docx import Converter
@@ -7,9 +7,10 @@ from PyPDF2 import PdfReader, PdfWriter
 import pandas as pd
 import pytesseract
 from PIL import Image
-
+from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
+app.secret_key = 'your_secret_key'  # Replace with your actual secret key
 UPLOAD_FOLDER = 'uploads'
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
@@ -175,6 +176,53 @@ def merge_pdf():
             return jsonify({"error": str(e)}), 500
         return jsonify({"merged_filename": merged_filename, "merged_pdf_path": merged_pdf_path}), 200
     return jsonify({"error": "Invalid file type"}), 400
+
+@app.route('/signup', methods=['GET', 'POST'])
+def signup():
+    if request.method == 'POST':
+        name = request.form['name']
+        email = request.form['email']
+        password = request.form['password']
+        hashed_password = generate_password_hash(password)
+
+        try:
+            conn = mysql.connector.connect(**db_config)
+            cursor = conn.cursor()
+            cursor.execute("INSERT INTO users (name, email, password) VALUES (%s, %s, %s)", (name, email, hashed_password))
+            conn.commit()
+            cursor.close()
+            conn.close()
+            flash('Account created successfully!', 'success')
+            return redirect(url_for('home'))
+        except mysql.connector.Error as err:
+            flash(f"Error: {err}", 'danger')
+            return redirect(url_for('signup'))
+    return render_template('signup.html')
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        email = request.form['email']
+        password = request.form['password']
+
+        try:
+            conn = mysql.connector.connect(**db_config)
+            cursor = conn.cursor()
+            cursor.execute("SELECT * FROM users WHERE email = %s", (email,))
+            user = cursor.fetchone()
+            cursor.close()
+            conn.close()
+
+            if user and check_password_hash(user[3], password):
+                flash('Logged in successfully!', 'success')
+                return redirect(url_for('home'))
+            else:
+                flash('Invalid email or password', 'danger')
+                return redirect(url_for('login'))
+        except mysql.connector.Error as err:
+            flash(f"Error: {err}", 'danger')
+            return redirect(url_for('login'))
+    return render_template('login.html')
 
 @app.route('/ocr')
 def ocr_form():

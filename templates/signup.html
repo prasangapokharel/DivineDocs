@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/signup.css') }}">
+</head>
+<body>
+    {% include 'navbar.html' %}
+
+    <div class="container">
+        <div class="left">
+                    <h1>Create new account</h1>
+            <div class="social-login">
+                <button class="social-btn facebook">Facebook</button>
+                <button class="social-btn google">Google</button>
+                <button class="social-btn sso">SSO</button>
+            </div>
+            <form action="/signup" method="POST">
+                <div class="input-group">
+                    <input type="text" name="name" placeholder="Name" required>
+                </div>
+                <div class="input-group">
+                    <input type="email" name="email" placeholder="Email" required>
+                </div>
+                <div class="input-group">
+                    <input type="password" name="password" placeholder="Password" required>
+                </div>
+                <button type="submit" class="signup-btn">Sign up</button>
+            </form>
+            <p class="login-link">Already member? <a href="/login">Log in</a></p>
+            <p class="terms">By creating an account, you agree to Hamro PDF <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.</p>
+        </div>
+        <div class="right">
+            <h2>PDF tools for productive people</h2>
+            <p>Hamro PDF helps you convert, edit, e-sign, and protect PDF files quickly and easily. Enjoy a full suite of tools to effectively manage documents — no matter where you’re working.</p>
+            <a href="#" class="see-tools">See all tools</a>
+        </div>
+    </div>
+</body>
+</html>

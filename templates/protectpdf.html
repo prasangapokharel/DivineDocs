@@ -7,10 +7,13 @@
 </head>
 <style>
     #password {
+        margin: 8px;
         background-color: white;
         border: 1px solid #ccc;
         padding: 10px;
         font-size: 16px;
+        border:1px solid;
+        border-radius: 5px;
     }
 </style>
 <body>
@@ -27,8 +30,8 @@
                 <button type="button" class="browse-btn" id="browseButton">Browse file</button>
             </label>
             <p id="fileInfo"></p>
-            <label for="password">Set Password:</label>
-            <input type="password" name="password" id="password" required>
+            <label for="password">🛡️ Set Password:</label>
+            <input type="password" name="password" id="password" placeholder="Secure with a password" required>
             <button type="submit" class="convert-btn">Protect</button>
         </form>
         <div id="downloadLinks" style="display: none;">
