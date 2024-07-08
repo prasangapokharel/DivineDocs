@@ -1,4 +1,4 @@
-from flask import Flask, request, send_file, render_template, jsonify, redirect, url_for, flash
+from flask import Flask, request, send_file, render_template, jsonify, redirect, url_for, flash, session
 import os
 import mysql.connector
 from pdf2docx import Converter
@@ -12,8 +12,11 @@ from werkzeug.security import generate_password_hash, check_password_hash
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'  # Replace with your actual secret key
 UPLOAD_FOLDER = 'uploads'
+PROFILE_PIC_FOLDER = os.path.join(UPLOAD_FOLDER, 'profile_pics')
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
+if not os.path.exists(PROFILE_PIC_FOLDER):
+    os.makedirs(PROFILE_PIC_FOLDER)
 
 # MySQL configuration
 db_config = {
@@ -30,6 +33,17 @@ pytesseract.pytesseract.tesseract_cmd = r'C:\Users\godsu\tesseract-ocr-w64-setup
 def home():
     return render_template('home.html')
 
+def add_points(user_id):
+    try:
+        conn = mysql.connector.connect(**db_config)
+        cursor = conn.cursor()
+        cursor.execute("UPDATE users SET points = points + 1 WHERE id = %s", (user_id,))
+        conn.commit()
+        cursor.close()
+        conn.close()
+    except mysql.connector.Error as err:
+        flash(f"Error: {err}", 'danger')
+
 @app.route('/upload', methods=['GET', 'POST'])
 def upload_file():
     if request.method == 'POST':
@@ -44,10 +58,11 @@ def upload_file():
             try:
                 conn = mysql.connector.connect(**db_config)
                 cursor = conn.cursor()
-                cursor.execute("INSERT INTO pdf_files (filename, file_path) VALUES (%s, %s)", (file.filename, pdf_path))
+                cursor.execute("INSERT INTO pdf_files (filename, file_path, user_id) VALUES (%s, %s, %s)", (file.filename, pdf_path, session.get('user_id')))
                 conn.commit()
                 cursor.close()
                 conn.close()
+                add_points(session.get('user_id'))
             except mysql.connector.Error as err:
                 return jsonify({"error": str(err)}), 500
             word_filename = os.path.splitext(file.filename)[0] + '.docx'
@@ -80,6 +95,7 @@ def convert_word_to_pdf():
         pdf_path = os.path.join(UPLOAD_FOLDER, pdf_filename)
         try:
             convert(word_path, pdf_path)
+            add_points(session.get('user_id'))
         except Exception as e:
             return jsonify({"error": str(e)}), 500
         return jsonify({"original_filename": file.filename, "word_path": word_path, "pdf_filename": pdf_filename, "pdf_path": pdf_path}), 200
@@ -110,6 +126,7 @@ def protect_pdf():
             writer.encrypt(password)
             with open(protected_pdf_path, 'wb') as f:
                 writer.write(f)
+            add_points(session.get('user_id'))
         except Exception as e:
             return jsonify({"error": str(e)}), 500
         return jsonify({"original_filename": file.filename, "pdf_path": pdf_path, "protected_filename": protected_pdf_filename, "protected_pdf_path": protected_pdf_path}), 200
@@ -140,6 +157,7 @@ def convert_pdf_to_excel():
             data = [line.split() for line in lines if line.strip()]
             df = pd.DataFrame(data)
             df.to_excel(excel_path, index=False)
+            add_points(session.get('user_id'))
         except Exception as e:
             return jsonify({"error": str(e)}), 500
         return jsonify({"original_filename": file.filename, "pdf_path": pdf_path, "excel_filename": excel_filename, "excel_path": excel_path}), 200
@@ -172,6 +190,7 @@ def merge_pdf():
                     writer.add_page(page)
             with open(merged_pdf_path, 'wb') as f:
                 writer.write(f)
+            add_points(session.get('user_id'))
         except Exception as e:
             return jsonify({"error": str(e)}), 500
         return jsonify({"merged_filename": merged_filename, "merged_pdf_path": merged_pdf_path}), 200
@@ -190,8 +209,15 @@ def signup():
             cursor = conn.cursor()
             cursor.execute("INSERT INTO users (name, email, password) VALUES (%s, %s, %s)", (name, email, hashed_password))
             conn.commit()
+            user_id = cursor.lastrowid
             cursor.close()
             conn.close()
+
+            # Set session variables
+            session['user_id'] = user_id
+            session['user_name'] = name
+            session['user_email'] = email
+
             flash('Account created successfully!', 'success')
             return redirect(url_for('home'))
         except mysql.connector.Error as err:
@@ -214,6 +240,9 @@ def login():
             conn.close()
 
             if user and check_password_hash(user[3], password):
+                session['user_id'] = user[0]
+                session['user_name'] = user[1]
+                session['user_email'] = email
                 flash('Logged in successfully!', 'success')
                 return redirect(url_for('home'))
             else:
@@ -224,27 +253,72 @@ def login():
             return redirect(url_for('login'))
     return render_template('login.html')
 
+@app.route('/logout')
+def logout():
+    session.clear()
+    flash('You have been logged out.', 'success')
+    return redirect(url_for('home'))
+
+@app.route('/profile', methods=['GET', 'POST'])
+def profile():
+    if 'user_id' not in session:
+        flash('Please log in to access your profile.', 'danger')
+        return redirect(url_for('login'))
+    
+    if request.method == 'POST':
+        if 'profile_pic' in request.files:
+            profile_pic = request.files['profile_pic']
+            if profile_pic.filename != '':
+                profile_pic_path = os.path.join(PROFILE_PIC_FOLDER, profile_pic.filename)
+                profile_pic.save(profile_pic_path)
+                try:
+                    conn = mysql.connector.connect(**db_config)
+                    cursor = conn.cursor()
+                    cursor.execute("UPDATE users SET profile_pic = %s WHERE id = %s", (profile_pic.filename, session['user_id']))
+                    conn.commit()
+                    cursor.close()
+                    conn.close()
+                    flash('Profile picture updated successfully!', 'success')
+                except mysql.connector.Error as err:
+                    flash(f"Error: {err}", 'danger')
+    user_id = session.get('user_id')
+    user_name = session.get('user_name')
+    user_email = session.get('user_email')
+    try:
+        conn = mysql.connector.connect(**db_config)
+        cursor = conn.cursor()
+        cursor.execute("SELECT profile_pic, points FROM users WHERE id = %s", (user_id,))
+        user = cursor.fetchone()
+        cursor.close()
+        conn.close()
+        profile_pic = user[0]
+        points = user[1]
+    except mysql.connector.Error as err:
+        flash(f"Error: {err}", 'danger')
+    return render_template('profile.html', user_name=user_name, user_email=user_email, profile_pic=profile_pic, points=points)
+
+@app.route('/history')
+def history():
+    if 'user_id' not in session:
+        flash('Please log in to access your history.', 'danger')
+        return redirect(url_for('login'))
+    user_id = session['user_id']
+    try:
+        conn = mysql.connector.connect(**db_config)
+        cursor = conn.cursor()
+        cursor.execute("SELECT filename, file_path, upload_time FROM pdf_files WHERE user_id = %s", (user_id,))
+        files = cursor.fetchall()
+        cursor.close()
+        conn.close()
+    except mysql.connector.Error as err:
+        flash(f"Error: {err}", 'danger')
+        return redirect(url_for('home'))
+    return render_template('history.html', files=files)
+
 @app.route('/ocr')
 def ocr_form():
     return render_template('ocr.html')
 
-@app.route('/convert-ocr', methods=['POST'])
-def convert_ocr():
-    if 'file' not in request.files:
-        return jsonify({"error": "No file part"}), 400
-    file = request.files['file']
-    if file.filename == '':
-        return jsonify({"error": "No selected file"}), 400
-    if file:
-        image_path = os.path.join(UPLOAD_FOLDER, file.filename)
-        file.save(image_path)
-        try:
-            img = Image.open(image_path)
-            text = pytesseract.image_to_string(img)
-        except Exception as e:
-            return jsonify({"error": str(e)}), 500
-        return jsonify({"original_filename": file.filename, "extracted_text": text}), 200
-    return jsonify({"error": "Invalid file type"}), 400
 
 @app.route('/download/<filename>', methods=['GET'])
 def download_file(filename):

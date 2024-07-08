@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>History</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/history.css') }}">
+</head>
+<body>
+    {% include 'navbar.html' %}
+    <header>
+        <h1>Your Activity History</h1>
+    </header>
+    <div class="container">
+        {% for file in files %}
+        <div class="card">
+            <div class="icon convert"></div>
+            <h3>{{ file[0] }}</h3>
+            <p>Path: {{ file[1] }}</p>
+            <p>Upload Time: {{ file[2] }}</p>
+        </div>
+        {% endfor %}
+    </div>
+</body>
+</html>

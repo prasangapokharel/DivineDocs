@@ -11,7 +11,6 @@
         <div class="navbar-container">
             <a href="/" class="logo">
                 <img src="{{ url_for('static', filename='images/logo.svg') }}" alt="Hamro PDF Logo">
-             
             </a>
             <div class="nav-links">
                 <a href="/upload">🔄 CONVERT PDF to WORD</a>
@@ -29,7 +28,13 @@
                 </div>
             </div>
             <div class="auth-links">
-                <a href="/signup" class="signup">Sign up</a>
+                {% if session.get('user_id') %}
+                    <a href="{{ url_for('profile') }}" class="profile">🧑 PROFILE</a>
+                    <a href="{{ url_for('history') }}" class="history">🪟 HISTORY</a>
+                {% else %}
+                    <a href="{{ url_for('signup') }}" class="signup">Sign up</a>
+                    <a href="{{ url_for('login') }}" class="login">Login</a>
+                {% endif %}
             </div>
             <div class="mobile-menu">
                 <span class="menu-icon">&#9776;</span>
@@ -43,8 +48,13 @@
         <a href="/">PDF to Word</a>
         <a href="/word-to-pdf">Word to PDF</a>
         <a href="#">Tool 1</a>
-        <a href="#">Login</a>
-        <a href="#" class="signup">Sign up</a>
+        {% if session.get('user_id') %}
+            <a href="{{ url_for('profile') }}">Profile</a>
+            <a href="{{ url_for('history') }}">History</a>
+        {% else %}
+            <a href="{{ url_for('login') }}">Login</a>
+            <a href="{{ url_for('signup') }}" class="signup">Sign up</a>
+        {% endif %}
     </div>
     <script>
         document.querySelector('.menu-icon').addEventListener('click', () => {
