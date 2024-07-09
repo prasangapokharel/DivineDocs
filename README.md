@@ -7,9 +7,10 @@ This project provides a web-based application for converting PDF files to Word d
 
 - 🔄Convert PDF to Word (DOCX)
 - 🔄Convert PDF to EXCEL (XLSX)
+- 🔄Convert PDF to JPG (JPG)
 - 🔄Convert Word (DOCX) to PDF
 - 🔐Protect PDF (PASSWORD)
-
+- 🧲Merge PDF (PASSWORD)
 ## Requirements
 
 - Python 3.6 or higher

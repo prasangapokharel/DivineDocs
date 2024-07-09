@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF to JPG Converter</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/upload.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/navbar.css') }}">
+</head>
+<body>
+    {% include 'navbar.html' %}
+    <div class="header">
+        <h2>PDF TO JPG CONVERTER</h2>
+        <p>Upload a PDF file to convert it to JPG images.</p>
+    </div>
+    <div class="container">
+        <form id="uploadForm" enctype="multipart/form-data">
+            <div class="file-upload" id="fileUploadLabel">
+                <input type="file" name="file" id="file" accept="application/pdf" required>
+                <span id="fileUploadText">DRAG AND DROP FILE HERE OR CLICK TO UPLOAD</span>
+                <button type="button" class="browse-btn" id="browseButton">Browse file</button>
+            </div>
+            <div id="fileInfo" style="display: none;">
+                <span id="fileName"></span>
+                <button type="button" class="remove-btn" id="removeButton">x</button>
+            </div>
+            <button type="submit" class="convert-btn">Convert</button>
+        </form>
+        <div id="downloadLinks" style="display: none;">
+            <h2>Conversion Successful!</h2>
+            <a id="downloadPdf" class="download-button" href="#">Download Original PDF</a>
+            <a id="downloadJpg" class="download-button" href="#">Download JPG Images</a>
+        </div>
+    </div>
+    <footer>
+        Powered by Prasanga
+    </footer>
+    <script>
+        document.getElementById('browseButton').addEventListener('click', function() {
+            document.getElementById('file').click();
+        });
+
+        document.getElementById('file').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            displayFileDetails(file);
+        });
+
+        const fileUploadLabel = document.getElementById('fileUploadLabel');
+        const fileInput = document.getElementById('file');
+
+        fileUploadLabel.addEventListener('dragover', function(event) {
+            event.preventDefault();
+            fileUploadLabel.classList.add('dragover');
+        });
+
+        fileUploadLabel.addEventListener('dragleave', function() {
+            fileUploadLabel.classList.remove('dragover');
+        });
+
+        fileUploadLabel.addEventListener('drop', function(event) {
+            event.preventDefault();
+            fileUploadLabel.classList.remove('dragover');
+            const files = event.dataTransfer.files;
+            if (files.length > 0) {
+                fileInput.files = files;
+                displayFileDetails(files[0]);
+            }
+        });
+
+        function displayFileDetails(file) {
+            if (file) {
+                document.getElementById('fileUploadText').textContent = 'File Selected';
+                document.getElementById('fileName').textContent = `File name: ${file.name}, File size: ${Math.round(file.size / 1024)} KB`;
+                document.getElementById('fileInfo').style.display = 'block';
+            }
+        }
+
+        document.getElementById('removeButton').addEventListener('click', function() {
+            fileInput.value = ''; // Clear the file input
+            document.getElementById('fileInfo').style.display = 'none';
+            document.getElementById('fileUploadText').textContent = 'DRAG AND DROP FILE HERE OR CLICK TO UPLOAD';
+        });
+
+        document.getElementById('uploadForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            if (!fileInput.value) {
+                alert('Please select a file to convert.');
+                return;
+            }
+            const formData = new FormData(this);
+
+            fetch('/convert-pdf-to-jpg', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert(data.error);
+                } else {
+                    document.getElementById('downloadLinks').style.display = 'block';
+                    document.getElementById('downloadPdf').href = `/download/${data.original_filename}?file_path=${data.pdf_path}`;
+                    document.getElementById('downloadJpg').href = `/download/${data.jpg_filename}?file_path=${data.jpg_path}`;
+                }
+            })
+            .catch(error => {
+                alert('An error occurred while uploading the file.');
+                console.error('Error:', error);
+            });
+        });
+    </script>
+</body>
+</html>

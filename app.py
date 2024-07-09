@@ -1,11 +1,12 @@
 from flask import Flask, request, send_file, render_template, jsonify, redirect, url_for, flash, session
 import os
 import mysql.connector
+from pdf2image import convert_from_path
+
 from pdf2docx import Converter
 from docx2pdf import convert
 from PyPDF2 import PdfReader, PdfWriter
 import pandas as pd
-import pytesseract
 from PIL import Image
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -25,9 +26,6 @@ db_config = {
     'host': 'localhost',
     'database': 'pdf_converter'
 }
-
-# Configure pytesseract to use the correct executable
-pytesseract.pytesseract.tesseract_cmd = r'C:\Users\godsu\tesseract-ocr-w64-setup-5.4.0.20240606.exe'
 
 @app.route('/')
 def home():
@@ -265,6 +263,9 @@ def profile():
         flash('Please log in to access your profile.', 'danger')
         return redirect(url_for('login'))
     
+    profile_pic = None  # Initialize to avoid UnboundLocalError
+    points = 0  # Initialize points
+    
     if request.method == 'POST':
         if 'profile_pic' in request.files:
             profile_pic = request.files['profile_pic']
@@ -281,6 +282,7 @@ def profile():
                     flash('Profile picture updated successfully!', 'success')
                 except mysql.connector.Error as err:
                     flash(f"Error: {err}", 'danger')
+    
     user_id = session.get('user_id')
     user_name = session.get('user_name')
     user_email = session.get('user_email')
@@ -291,10 +293,12 @@ def profile():
         user = cursor.fetchone()
         cursor.close()
         conn.close()
-        profile_pic = user[0]
-        points = user[1]
+        if user:
+            profile_pic = user[0]
+            points = user[1]
     except mysql.connector.Error as err:
         flash(f"Error: {err}", 'danger')
+    
     return render_template('profile.html', user_name=user_name, user_email=user_email, profile_pic=profile_pic, points=points)
 
 @app.route('/history')
@@ -315,9 +319,32 @@ def history():
         return redirect(url_for('home'))
     return render_template('history.html', files=files)
 
-@app.route('/ocr')
-def ocr_form():
-    return render_template('ocr.html')
+@app.route('/pdf-to-jpg')
+def pdf_to_jpg_form():
+    return render_template('pdftojpg.html')
+
+@app.route('/convert-pdf-to-jpg', methods=['POST'])
+def convert_pdf_to_jpg():
+    if 'file' not in request.files:
+        return jsonify({"error": "No file part"}), 400
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({"error": "No selected file"}), 400
+    if file and file.filename.endswith('.pdf'):
+        pdf_path = os.path.join(UPLOAD_FOLDER, file.filename)
+        file.save(pdf_path)
+        jpg_filename = os.path.splitext(file.filename)[0] + '.jpg'
+        jpg_path = os.path.join(UPLOAD_FOLDER, jpg_filename)
+        try:
+            images = convert_from_path(pdf_path)
+            for i, image in enumerate(images):
+                image.save(os.path.join(UPLOAD_FOLDER, f"{os.path.splitext(file.filename)[0]}_{i + 1}.jpg"), 'JPEG')
+            add_points(session.get('user_id'))
+        except Exception as e:
+            return jsonify({"error": str(e)}), 500
+        return jsonify({"original_filename": file.filename, "pdf_path": pdf_path, "jpg_filename": jpg_filename, "jpg_path": jpg_path}), 200
+    return jsonify({"error": "Invalid file type"}), 400
+
 
 
 @app.route('/download/<filename>', methods=['GET'])
