@@ -1,6 +1,6 @@
 body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-    background: linear-gradient(135deg, #a2e5d7, #dbf3fa);
+    background: linear-gradient(135deg, #f0f0f5, #dbf3fa);
     height: 100vh;
     display: flex;
     flex-direction: column;

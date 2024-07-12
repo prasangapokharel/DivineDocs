@@ -1,14 +1,21 @@
 from flask import Flask, request, send_file, render_template, jsonify, redirect, url_for, flash, session
 import os
+import io
+from jpgtopdf import create_jpgtopdf_blueprint
+from flask import Response
 import mysql.connector
 from pdf2image import convert_from_path
-
+from werkzeug.utils import secure_filename
 from pdf2docx import Converter
 from docx2pdf import convert
 from PyPDF2 import PdfReader, PdfWriter
 import pandas as pd
 from PIL import Image
 from werkzeug.security import generate_password_hash, check_password_hash
+from texttopdf import create_texttopdf_blueprint
+from htmltopdf import create_htmltopdf_blueprint
+from webptopdf import create_webptopdf_blueprint
+from withdraw import create_withdraw_blueprint
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'  # Replace with your actual secret key
@@ -257,49 +264,97 @@ def logout():
     flash('You have been logged out.', 'success')
     return redirect(url_for('home'))
 
-@app.route('/profile', methods=['GET', 'POST'])
-def profile():
+@app.route('/delete_account', methods=['POST'])
+def delete_account():
     if 'user_id' not in session:
-        flash('Please log in to access your profile.', 'danger')
+        flash('You need to login first.', 'danger')
         return redirect(url_for('login'))
     
-    profile_pic = None  # Initialize to avoid UnboundLocalError
-    points = 0  # Initialize points
-    
-    if request.method == 'POST':
-        if 'profile_pic' in request.files:
-            profile_pic = request.files['profile_pic']
-            if profile_pic.filename != '':
-                profile_pic_path = os.path.join(PROFILE_PIC_FOLDER, profile_pic.filename)
-                profile_pic.save(profile_pic_path)
-                try:
-                    conn = mysql.connector.connect(**db_config)
-                    cursor = conn.cursor()
-                    cursor.execute("UPDATE users SET profile_pic = %s WHERE id = %s", (profile_pic.filename, session['user_id']))
-                    conn.commit()
-                    cursor.close()
-                    conn.close()
-                    flash('Profile picture updated successfully!', 'success')
-                except mysql.connector.Error as err:
-                    flash(f"Error: {err}", 'danger')
-    
-    user_id = session.get('user_id')
-    user_name = session.get('user_name')
-    user_email = session.get('user_email')
+    user_id = session['user_id']
     try:
         conn = mysql.connector.connect(**db_config)
         cursor = conn.cursor()
-        cursor.execute("SELECT profile_pic, points FROM users WHERE id = %s", (user_id,))
-        user = cursor.fetchone()
+        # Optionally, delete associated user data first
+        cursor.execute("DELETE FROM users WHERE id = %s", (user_id,))
+        conn.commit()
+        session.clear()
+        flash('Your account has been successfully deleted.', 'success')
+    except mysql.connector.Error as err:
+        flash(f"Database Error: {err}", 'danger')
+        return redirect(url_for('profile'))
+    finally:
         cursor.close()
         conn.close()
-        if user:
-            profile_pic = user[0]
-            points = user[1]
-    except mysql.connector.Error as err:
-        flash(f"Error: {err}", 'danger')
     
-    return render_template('profile.html', user_name=user_name, user_email=user_email, profile_pic=profile_pic, points=points)
+    return redirect(url_for('home'))
+
+
+@app.route('/profile_pic')
+def profile_pic():
+    user_id = session.get('user_id')
+    if not user_id:
+        flash("Please log in to view the profile image.", "danger")
+        return redirect(url_for('login'))
+
+    try:
+        conn = mysql.connector.connect(**db_config)
+        cursor = conn.cursor()
+        cursor.execute("SELECT profile_pic_blob FROM users WHERE id = %s", (user_id,))
+        pic_blob = cursor.fetchone()
+        if pic_blob:
+            return Response(pic_blob[0], mimetype='image/jpeg')
+        flash("No profile image found.", "info")
+    except mysql.connector.Error as err:
+        flash(f"Database error: {err}", "danger")
+    finally:
+        cursor.close()
+        conn.close()
+    return redirect(url_for('profile'))
+
+@app.route('/profile', methods=['GET', 'POST'])
+def profile():
+    user_id = session.get('user_id')
+    if not user_id:
+        flash('Please log in to access your profile.', 'danger')
+        return redirect(url_for('login'))
+
+    if request.method == 'POST':
+        name = request.form.get('name')
+        email = request.form.get('email')
+        phone = request.form.get('phone')
+        address = request.form.get('address')
+        github = request.form.get('github')
+        twitter = request.form.get('twitter')
+        instagram = request.form.get('instagram')
+        facebook = request.form.get('facebook')
+        profile_pic = request.files.get('profile_pic')
+
+        conn = mysql.connector.connect(**db_config)
+        cursor = conn.cursor()
+
+        if profile_pic:
+            pic_data = profile_pic.read()
+            cursor.execute("UPDATE users SET profile_pic_blob = %s WHERE id = %s", (pic_data, user_id))
+
+        cursor.execute("""
+            UPDATE users SET name = %s, email = %s, phone = %s, address = %s, 
+            github = %s, twitter = %s, instagram = %s, facebook = %s
+            WHERE id = %s
+        """, (name, email, phone, address, github, twitter, instagram, facebook, user_id))
+        conn.commit()
+        cursor.close()
+        conn.close()
+
+    return render_template('profile.html', user=get_user_details(user_id))
+
+def get_user_details(user_id):
+    conn = mysql.connector.connect(**db_config)
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT * FROM users WHERE id = %s", (user_id,))
+    user = cursor.fetchone()
+    cursor.close()
+    conn.close()
+    return user
 
 @app.route('/history')
 def history():
@@ -333,24 +388,80 @@ def convert_pdf_to_jpg():
     if file and file.filename.endswith('.pdf'):
         pdf_path = os.path.join(UPLOAD_FOLDER, file.filename)
         file.save(pdf_path)
-        jpg_filename = os.path.splitext(file.filename)[0] + '.jpg'
-        jpg_path = os.path.join(UPLOAD_FOLDER, jpg_filename)
         try:
-            images = convert_from_path(pdf_path)
+            images = convert_from_path(pdf_path, dpi=300)  # High resolution
+            jpg_paths = []
             for i, image in enumerate(images):
-                image.save(os.path.join(UPLOAD_FOLDER, f"{os.path.splitext(file.filename)[0]}_{i + 1}.jpg"), 'JPEG')
+                jpg_filename = f"{os.path.splitext(file.filename)[0]}_{i + 1}.jpg"
+                jpg_path = os.path.join(UPLOAD_FOLDER, jpg_filename)
+                image.save(jpg_path, 'JPEG')
+                jpg_paths.append(jpg_path)
             add_points(session.get('user_id'))
         except Exception as e:
             return jsonify({"error": str(e)}), 500
-        return jsonify({"original_filename": file.filename, "pdf_path": pdf_path, "jpg_filename": jpg_filename, "jpg_path": jpg_path}), 200
+        return jsonify({"original_filename": file.filename, "pdf_path": pdf_path, "jpg_paths": jpg_paths}), 200
     return jsonify({"error": "Invalid file type"}), 400
 
+@app.route('/update_profile', methods=['POST'])
+def update_profile():
+    user_id = session.get('user_id')
+    if not user_id:
+        flash("Please log in to update your profile.", "danger")
+        return redirect(url_for('login'))
 
+    try:
+        conn = mysql.connector.connect(**db_config)
+        cursor = conn.cursor()
+
+        # Update profile picture if provided
+        profile_pic = request.files.get('profile_pic')
+        if profile_pic:
+            pic_data = profile_pic.read()
+            cursor.execute("UPDATE users SET profile_pic_blob = %s WHERE id = %s", (pic_data, user_id))
+
+        # Update other fields
+        name = request.form.get('name', '')
+        email = request.form.get('email', '')
+        phone = request.form.get('phone', '')
+        address = request.form.get('address', '')
+        github = request.form.get('github', '')
+        twitter = request.form.get('twitter', '')
+        instagram = request.form.get('instagram', '')
+        facebook = request.form.get('facebook', '')
+
+        # Construct SQL query for updating user details
+        cursor.execute("""
+            UPDATE users SET 
+            name = %s, email = %s, phone = %s, address = %s, 
+            github = %s, twitter = %s, instagram = %s, facebook = %s
+            WHERE id = %s
+        """, (name, email, phone, address, github, twitter, instagram, facebook, user_id))
+
+        conn.commit()
+        flash("Profile updated successfully!", "success")
+    except mysql.connector.Error as err:
+        flash(f"Database error: {err}", "danger")
+    finally:
+        cursor.close()
+        conn.close()
+
+    return redirect(url_for('profile'))
 
 @app.route('/download/<filename>', methods=['GET'])
 def download_file(filename):
     file_path = request.args.get('file_path')
     return send_file(file_path, as_attachment=True, download_name=filename)
+
+# Create and register the blueprints
+jpgtopdf_bp = create_jpgtopdf_blueprint(db_config, add_points)
+texttopdf_bp = create_texttopdf_blueprint(db_config, add_points)
+webptopdf_bp = create_webptopdf_blueprint(db_config, add_points)
+withdraw_bp = create_withdraw_blueprint(db_config, add_points)  # Create the withdraw blueprint
+
+app.register_blueprint(jpgtopdf_bp, url_prefix='/jpgtopdf')
+app.register_blueprint(texttopdf_bp, url_prefix='/texttopdf')
+app.register_blueprint(webptopdf_bp, url_prefix='/webptopdf')
+app.register_blueprint(withdraw_bp)  # Register the withdraw blueprint
 
 if __name__ == "__main__":
     app.run(debug=True)

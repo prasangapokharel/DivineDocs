@@ -1,39 +1,36 @@
-body, html {
+/* Global Styles */
+body {
     margin: 0;
     padding: 0;
-    font-family: Arial, sans-serif;
-    background: #f9f9f9;
-    justify-content: center;
-    align-items: center;
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    background: linear-gradient(135deg, #f0f0f5, #dbf3fa);
+   
 }
 
 .container {
-    display: flex;
-    height: 100%;
-    width: 100%;
-    max-width: 90%;
-    margin: 2% 5%;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    justify-content: center;
+    align-items: center;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    height: auto;
+    max-width: 1200px;
+    margin: 5% auto;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.1);
     border-radius: 10px;
     overflow: hidden;
+    background: #fff;
 }
 
 .left, .right {
     padding: 40px;
-    background: #fff;
 }
 
 .left {
-    flex: 1;
+    border-right: 1px solid #eee;
     display: flex;
     flex-direction: column;
     align-items: center;
-    border-right: 1px solid #eee;
-}
-
-.left img {
-    height: 80px;
-    margin-bottom: 20px;
+    background: linear-gradient(to bottom, #fff, #f9f9f9);
 }
 
 .left h1 {
@@ -56,6 +53,11 @@ body, html {
     cursor: pointer;
     margin: 0 5px;
     font-size: 1rem;
+    transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.social-btn:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .facebook {
@@ -80,71 +82,112 @@ body, html {
 
 .input-group input {
     width: 100%;
-    padding: 10px;
+    padding: 15px;
     border: 1px solid #ccc;
     border-radius: 4px;
     font-size: 1rem;
+    transition: border-color 0.3s ease;
+}
+
+.input-group input:focus {
+    border-color: #10a37f;
 }
 
 .signup-btn {
     width: 100%;
-    padding: 10px;
+    padding: 15px;
     background-color:  #10a37f;
     border: none;
     color: white;
-    font-size: 1rem;
+    font-size: 1.1rem;
     cursor: pointer;
     border-radius: 4px;
+    transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+    margin-top: 20px;
 }
 
 .signup-btn:hover {
-    background-color: #d32f2f;
+    background-color: white;
+    color: #10a37f;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border: 2px solid #10a37f;
 }
 
 .login-link {
     margin-top: 20px;
     color: #555;
+    font-size: 0.9rem;
 }
 
 .login-link a {
     color:  #10a37f;
+    text-decoration: none;
+}
+
+.login-link a:hover {
+    text-decoration: underline;
 }
 
 .terms {
     margin-top: 20px;
     font-size: 0.8rem;
     color: #777;
+    text-align: center;
 }
 
 .terms a {
     color:  #10a37f;
+    text-decoration: none;
+}
+
+.terms a:hover {
+    text-decoration: underline;
 }
 
 .right {
-    flex: 1;
+    background: linear-gradient(to top, #f5f5f5, #fff);
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    background: #f5f5f5;
 }
 
 .right h2 {
     margin-bottom: 20px;
     color: #333;
+    font-size: 1.8rem;
 }
 
 .right p {
     margin-bottom: 20px;
     color: #555;
     text-align: center;
+    font-size: 1.1rem;
 }
 
 .see-tools {
     color:  #10a37f;
     text-decoration: none;
+    font-size: 1.1rem;
+    transition: color 0.3s ease, text-decoration 0.3s ease;
 }
 
 .see-tools:hover {
+    color: #0e8d68;
     text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+    .container {
+        grid-template-columns: 1fr;
+    }
+
+    .left, .right {
+        padding: 20px;
+    }
+
+    .left {
+        border-right: none;
+        border-bottom: 1px solid #eee;
+    }
 }

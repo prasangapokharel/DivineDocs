@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/navbar.css') }}">
     <title>Navbar</title>
 </head>
@@ -13,25 +14,27 @@
                 <img src="{{ url_for('static', filename='images/logo.svg') }}" alt="Hamro PDF Logo">
             </a>
             <div class="nav-links">
-                <a href="/upload">🔄 CONVERT PDF to WORD</a>
-                <a href="/pdf-to-excel">🔄 CONVERT PDF to EXCEL</a>
-                <a href="/protect-pdf">🔐 PROTECT PDF</a>
-                <a href="/merge-pdf">🧣 MERGE PDF</a>
+                <a href="/"><i class="fas fa-file-word" style="color:#2B579A;"></i> CONVERT PDF to WORD</a>
+                <a href="/pdf-to-excel"><i class="fas fa-file-excel" style="color:#217346;"></i> CONVERT PDF to EXCEL</a>
+                <a href="/protect-pdf"><i class="fas fa-lock" style="color:#ffcc00;"></i> PROTECT PDF</a>
+                <a href="/merge-pdf"><i class="fas fa-object-group" style="color:#7b1fa2;"></i> MERGE PDF</a>
 
                 <div class="dropdown">
                     <button class="dropbtn">ALL PDF TOOLS</button>
                     <div class="dropdown-content">
-                        <a href="/">PDF to Word</a>
-                        <a href="/word-to-pdf">Word to PDF</a>
-                        <a href="/pdf-to-jpg">OCR</a>
+                        <a href="/jpgtopdf"><i class="fas fa-file-image" style="color:#d83b01;"></i> JPG to PDF</a>
+                        <a href="/word-to-pdf"><i class="fas fa-file-pdf" style="color:#d83b01;"></i> Word to PDF</a>
+                        <a href=/webptopdf"/texttopdf"><i class="fas fa-file-alt" style="color:#d83b01;"></i> TEXT PDF</a>
+                        <a href=""><i class="fas fa-file-code" style="color:#d83b01;"></i> WEBP to PDF</a>
+                        <a href="/htmltopdf"><i class="fas fa-file-code" style="color:#d83b01;"></i> HTML to PDF</a>
                         <!-- Add more tools here as needed -->
                     </div>
                 </div>
             </div>
             <div class="auth-links">
                 {% if session.get('user_id') %}
-                    <a href="{{ url_for('profile') }}" class="profile">🧑 PROFILE</a>
-                    <a href="{{ url_for('history') }}" class="history">🪟 HISTORY</a>
+                    <a href="{{ url_for('profile') }}" class="profile"><i class="fas fa-user" style="color:#005a9e;"></i> PROFILE</a>
+                    <a href="{{ url_for('history') }}" class="history"><i class="fas fa-history" style="color:#ff8c00;"></i> HISTORY</a>
                 {% else %}
                     <a href="{{ url_for('signup') }}" class="signup">Sign up</a>
                     <a href="{{ url_for('login') }}" class="login">Login</a>
@@ -43,15 +46,16 @@
         </div>
     </nav>
     <div class="mobile-nav">
-        <a href="/">CONVERT PDF</a>
-        <a href="#">MERGE PDF</a>
-        <a href="/protect-pdf">🔐 PDF</a>
-        <a href="/">PDF to Word</a>
-        <a href="/word-to-pdf">Word to PDF</a>
+        <a href="/"><i class="fas fa-file-word" style="color:#2B579A;"></i> CONVERT PDF</a>
+        <a href="#"><i class="fas fa-object-group" style="color:#7b1fa2;"></i> MERGE PDF</a>
+        <a href="/protect-pdf"><i class="fas fa-lock" style="color:#ffcc00;"></i> PDF</a>
+        <a href="/"><i class="fas fa-file-word" style="color:#2B579A;"></i> PDF to Word</a>
+        <a href="/word-to-pdf"><i class="fas fa-file-pdf" style="color:#d83b01;"></i> Word to PDF</a>
+        <a href="/jpgtopdf"><i class="fas fa-file-image" style="color:#d83b01;"></i> JPG to PDF</a>
         <a href="#">Tool 1</a>
         {% if session.get('user_id') %}
-            <a href="{{ url_for('profile') }}">Profile</a>
-            <a href="{{ url_for('history') }}">History</a>
+            <a href="{{ url_for('profile') }}"><i class="fas fa-user" style="color:#005a9e;"></i> Profile</a>
+            <a href="{{ url_for('history') }}"><i class="fas fa-history" style="color:#ff8c00;"></i> History</a>
         {% else %}
             <a href="{{ url_for('login') }}">Login</a>
             <a href="{{ url_for('signup') }}" class="signup">Sign up</a>

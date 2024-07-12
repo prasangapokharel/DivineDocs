@@ -3,58 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Profile</title>
+    <title>User Profile</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/profile.css') }}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 </head>
 <body>
     {% include 'navbar.html' %}
-    <div class="profile-container">
-        <div class="profile-header">
-            <div class="profile-pic-container">
-                <img src="{{ url_for('static', filename='profile_pics/' + profile_pic) }}" alt="Profile Picture" class="profile-pic">
-                <label for="profile_pic" class="edit-icon">
-                    <i class="fas fa-edit"></i>
-                </label>
-                <input type="file" name="profile_pic" id="profile_pic" onchange="document.getElementById('upload-btn').click();">
-            </div>
-            <h2 id="user_name">{{ user_name }}</h2>
-            <p id="user_email">{{ user_email }}</p>
-            <span id="user_status">Member since 2019</span>
+    <div class="container">
+        <div class="balance">
+            <img class="token"src="{{ url_for('static', filename='images/btt.svg') }}" alt="Hamro PDF Logo">
+
+            Available Balance  <strong class="point"> {{ user.points }} BTT</strong>
         </div>
-        <div class="profile-details">
-            <form action="/profile" method="POST" enctype="multipart/form-data">
-                <label for="profile_pic" class="profile-pic-label">
-                    <input type="file" name="profile_pic" id="profile_pic" style="display: none;">
-                    <i class="fas fa-camera"></i> Change Profile Picture
-                </label>
-                <button type="submit" class="btn upload-btn" id="upload-btn">Upload</button>
-            </form>
-            <hr>
-            <div class="profile-info">
-                <div class="profile-info-item">
-                    <span class="profile-info-label">Name:</span> <input type="text" value="{{ user_name }}" class="profile-info-value" id="user_name_info">
+
+        <form action="{{ url_for('update_profile') }}" method="post" enctype="multipart/form-data">
+            <div class="section profile-section">
+                <div class="profile-img-wrapper">
+                    <img src="{{ user.profile_image_url }}" alt="Profile Image" class="profile-img">
+                    <label for="profile_pic" class="change-pic">Change Picture</label>
                 </div>
-                <div class="profile-info-item">
-                    <span class="profile-info-label">Email:</span> <input type="email" value="{{ user_email }}" class="profile-info-value" id="user_email_info">
+                <input type="file" name="profile_pic" id="profile_pic">
+            </div>
+            <div class="section details-section">
+                <input type="text" name="name" placeholder="Full Name" value="{{ user.name }}" class="input-group">
+                <input type="email" name="email" placeholder="Email" value="{{ user.email }}" class="input-group">
+                <input type="text" name="phone" placeholder="Phone" value="{{ user.phone }}" class="input-group">
+                <input type="text" name="address" placeholder="Address" value="{{ user.address }}" class="input-group">
+                <button type="submit">Save Changes</button>
+                        <a href="{{ url_for('withdraw.withdraw') }}" class="withdraw-btn">Withdraw</a>
+
+            </div>
+            <div class="section social-links">
+                <h2>Social Links</h2>
+                <div class="icon-input">
+                    <i class="fa-brands fa-github icon"></i>
+                    <input type="text" name="github" placeholder="GitHub" value="{{ user.github }}" class="input-group">
                 </div>
-                <div class="profile-info-item">
-                    <span class="profile-info-label">Balance:</span> <input type="text" value="{{ balance }}" class="profile-info-value" id="user_balance">
+                <div class="icon-input">
+                    <i class="fa-brands fa-twitter icon"></i>
+                    <input type="text" name="twitter" placeholder="Twitter" value="{{ user.twitter }}" class="input-group">
+                </div>
+                <div class="icon-input">
+                    <i class="fa-brands fa-instagram icon"></i>
+                    <input type="text" name="instagram" placeholder="Instagram" value="{{ user.instagram }}" class="input-group">
+                </div>
+                <div class="icon-input">
+                    <i class="fa-brands fa-facebook icon"></i>
+                    <input type="text" name="facebook" placeholder="Facebook" value="{{ user.facebook }}" class="input-group">
                 </div>
             </div>
-            <div class="save-section">
-                <button type="button" class="btn save-btn">Save your changes</button>
-            </div>
-            <div class="delete-section">
-                <h3>Delete Your Account</h3>
-                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
-                <button type="button" class="btn delete-btn">Delete</button>
-            </div>
-            <div class="logout-section">
-                <a href="/logout" class="btn logout-btn">Logout</a>
-            </div>
-        </div>
+        </form>
     </div>
-    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 </body>
 </html>

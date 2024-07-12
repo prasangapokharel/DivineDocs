@@ -2,6 +2,7 @@
 <html>
 <head>
     <title>Protect PDF</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/upload.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/navbar.css') }}">
 </head>
@@ -12,7 +13,7 @@
         border: 1px solid #ccc;
         padding: 10px;
         font-size: 16px;
-        border:1px solid;
+        border: 1px solid;
         border-radius: 5px;
     }
 </style>
@@ -30,7 +31,7 @@
                 <button type="button" class="browse-btn" id="browseButton">Browse file</button>
             </label>
             <p id="fileInfo"></p>
-            <label for="password">🛡️ Set Password:</label>
+            <label for="password"><i class="fas fa-shield-alt"></i> Set Password:</label>
             <input type="password" name="password" id="password" placeholder="Secure with a password" required>
             <button type="submit" class="convert-btn">Protect</button>
         </form>

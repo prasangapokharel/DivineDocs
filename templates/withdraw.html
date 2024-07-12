@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Withdraw Points</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/withdraw.css') }}">
+</head>
+<body>
+    {% include 'navbar.html' %}
+    <div class="container">
+        <h1>Withdraw Points</h1>
+        <div id="step1" class="step">
+            <label for="receiving_account">Receiving Account:</label>
+            <input type="text" id="receiving_account" name="receiving_account" placeholder="Paste or enter the account address" required>
+            <button id="nextButton">Next</button>
+        </div>
+        <div id="step2" class="step" style="display:none;">
+            <label for="token">Token:</label>
+            <select id="token" name="token" required>
+                <option value="BTT">BTT (BitTorrent)</option>
+            </select>
+            <label for="amount">Amount to withdraw:</label>
+            <input type="number" id="amount" name="amount" placeholder="Enter amount" required>
+            <button id="withdrawButton">Withdraw</button>
+        </div>
+        <a href="{{ url_for('home') }}">Back to Home</a>
+    </div>
+    <script>
+        document.getElementById('nextButton').addEventListener('click', function() {
+            document.getElementById('step1').style.display = 'none';
+            document.getElementById('step2').style.display = 'block';
+        });
+
+        document.getElementById('withdrawButton').addEventListener('click', function() {
+            const receivingAccount = document.getElementById('receiving_account').value;
+            const token = document.getElementById('token').value;
+            const amount = document.getElementById('amount').value;
+
+            if (!receivingAccount || !token || !amount) {
+                alert('Please fill in all fields.');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('receiving_account', receivingAccount);
+            formData.append('token', token);
+            formData.append('amount', amount);
+
+            fetch('/withdraw', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert(data.error);
+                } else {
+                    alert('Withdrawal successful!');
+                    window.location.href = "{{ url_for('home') }}";
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred. Please try again.');
+            });
+        });
+    </script>
+</body>
+</html>
