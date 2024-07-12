@@ -9,3 +9,6 @@ openpyxl==3.0.9
 pytesseract==0.3.8
 Pillow==8.3.2
 Werkzeug==2.0.3
+fpdf
+pdf2image
+pdfkit

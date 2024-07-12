@@ -11,9 +11,8 @@
     {% include 'navbar.html' %}
     <div class="container">
         <div class="balance">
-            <img class="token"src="{{ url_for('static', filename='images/btt.svg') }}" alt="Hamro PDF Logo">
-
-            Available Balance  <strong class="point"> {{ user.points }} BTT</strong>
+            <img class="token" src="{{ url_for('static', filename='images/btt.svg') }}" alt="Hamro PDF Logo">
+            Available Balance: <strong class="point">{{ user.points }} BTT</strong>
         </div>
 
         <form action="{{ url_for('update_profile') }}" method="post" enctype="multipart/form-data">
@@ -30,8 +29,7 @@
                 <input type="text" name="phone" placeholder="Phone" value="{{ user.phone }}" class="input-group">
                 <input type="text" name="address" placeholder="Address" value="{{ user.address }}" class="input-group">
                 <button type="submit">Save Changes</button>
-                        <a href="{{ url_for('withdraw.withdraw') }}" class="withdraw-btn">Withdraw</a>
-
+                <a href="{{ url_for('withdraw.withdraw') }}" class="withdraw-btn">Withdraw</a>
             </div>
             <div class="section social-links">
                 <h2>Social Links</h2>
@@ -53,6 +51,7 @@
                 </div>
             </div>
         </form>
+        <a href="{{ url_for('logout') }}" class="logout-btn">Logout</a>
     </div>
 </body>
 </html>
