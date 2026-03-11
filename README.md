@@ -1,71 +1,49 @@
-![Home Image](./Screenshot/home.png)
-![Home Image](./Screenshot/signup.png)
-![Home Image](./Screenshot/protectpdf.png)
-![Home Image](./Screenshot/withdraw.png)
-![Home Image](./Screenshot/profile.png)
+# DivineDocs
 
+> All-in-one PDF toolkit — convert, protect, merge and split documents with ease.
 
-# Document Converter
-
-This project provides a web-based application for converting PDF files to Word documents (DOCX) and Word documents (DOCX) to PDF files.
+[![Python](https://img.shields.io/badge/Python-3.10+-blue?style=flat-square&logo=python)](https://python.org)
+[![Flask](https://img.shields.io/badge/Flask-3.x-black?style=flat-square&logo=flask)](https://flask.palletsprojects.com)
+[![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)](LICENSE)
 
 ## Features
 
-🔄 Convert PDF to Word (DOCX)
-🔄 Convert PDF to EXCEL (XLSX)
-🔄 Convert PDF to JPG (JPG)
-🔄 Convert Word (DOCX) to PDF
-🔄 Convert Text (TXT) to PDF
-🔄 Convert WebP to PDF
-🔄 Convert HTML to PDF
-🔄 Convert JPG to PDF
-🔐 Protect PDF (PASSWORD)
-🧲 Merge PD
+| Conversion | Direction |
+|-----------|-----------|
+| Word → PDF | ✅ |
+| JPG / WebP → PDF | ✅ |
+| HTML → PDF | ✅ |
+| Text → PDF | ✅ |
+| PDF → Excel | ✅ |
+| PDF → Word | ✅ |
+| Protect PDF | ✅ (password encryption) |
 
-## Requirements
+## Getting Started
 
-- Python 3.6 or higher
-- MySQL database
-
-## Installation
-
-### 1. Clone the Repository
-
-First, clone the repository to your local machine:
-
-```sh
-git clone https://github.com/prasangapokharel/DivineDocs.git
-cd Divine Docs
-
-```
-### 2.Create and Activate a Virtual Environment
-
-```
-python -m venv venv
-source venv/bin/activate   # On Windows use `venv\Scripts\activate
-```
-
-### 3. Install Required Packages
-```
-pip install -r requirements.txt
-```
-
-### 4. Set Up the MySQL Database
-```
-CREATE DATABASE pdf_converter;
-```
-
-### 5. Run the Flask Application
-```
+```bash
+git clone https://github.com/prasangapokharel/divine-docs.git
+cd divine-docs
+pip install -r requirement.txt
 python app.py
-
 ```
 
-### 6. Open Your Web Browser
+Open `http://localhost:5000`
+
+## Project Structure
 
 ```
-http://127.0.0.1:5000/
-
+divine-docs/
+├── app.py              # Main Flask app
+├── htmltopdf.py        # HTML → PDF converter
+├── jpgtopdf.py         # JPG/WebP → PDF converter
+├── texttopdf.py        # Text → PDF converter
+├── webptopdf.py        # WebP → PDF converter
+├── withdraw.py         # PDF protection utility
+├── static/             # CSS, JS, assets
+├── templates/          # Jinja2 HTML templates
+└── uploads/            # Temp upload folder
 ```
 
+## License
 
+MIT License — © 2025 Prasanga Pokharel
